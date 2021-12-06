@@ -7,6 +7,7 @@ import CartProvider from "./store/CartProvider";
 
 function App() {
   const [cartIsShown, setCartIsShown] = useState(false);
+  const [orderIsSubmitted, setOrderIsSubmitted] = useState(false);
 
   const showCartHandler = () => {
     setCartIsShown(true);
@@ -14,11 +15,12 @@ function App() {
 
   const hideCartHandler = () => {
     setCartIsShown(false);
+    setOrderIsSubmitted(true);
   }
 
   return (
     <CartProvider>
-      {cartIsShown && <Cart onClose={hideCartHandler} />}
+      {cartIsShown && <Cart onClose={hideCartHandler} orderIsSubmitted={orderIsSubmitted} setOrderIsSubmitted={setOrderIsSubmitted} />}
       <Header onShowCart={showCartHandler} />
       <main>
         <Meals />
