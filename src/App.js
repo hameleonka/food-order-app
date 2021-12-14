@@ -14,8 +14,10 @@ function App() {
   }
 
   const hideCartHandler = () => {
+    if (orderIsSubmitted) {
+      setOrderIsSubmitted(false);
+    }
     setCartIsShown(false);
-    setOrderIsSubmitted(true);
   }
 
   return (
