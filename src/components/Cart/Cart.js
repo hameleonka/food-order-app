@@ -12,6 +12,7 @@ function Cart(props) {
   const [isCheckout, setIsCheckout] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [didSubmit, setDidSubmit] = useState(false);
+  const [httpError, setHttpError] = useState(null);
 
   const totalAmount = `$${cartCxt.totalAmount.toFixed(2)}`;
   const hasItems = cartCxt.items.length > 0;
@@ -28,17 +29,28 @@ function Cart(props) {
   }
 
   const submitOrderhandler = async (userData) => {
-    setIsSubmitting(true);
-    const response = await fetch('https://food-order-app-439a7-default-rtdb.firebaseio.com/orders.json', {
-      method: 'POST',
-      body: JSON.stringify({
-        user: userData,
-        orderedItems: cartCxt.items
-      })
-    });
-    setIsSubmitting(false);
-    setDidSubmit(true);
-    cartCxt.resetCart();
+    setHttpError(null);
+    try {
+      setIsSubmitting(true);
+      const response = await fetch('https://food-order-app-439a7-default-rtdb.firebaseio.com/orders.json', {
+        method: 'POST',
+        body: JSON.stringify({
+          user: userData,
+          orderedItems: cartCxt.items
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Something went wrong!');
+      }
+
+      setIsSubmitting(false);
+      setDidSubmit(true);
+      cartCxt.resetCart();
+    } catch (error) {
+      setIsSubmitting(false);
+      setHttpError(error.message);
+    }
   };
 
   const cartItems = cartCxt.items.map(item =>
@@ -77,13 +89,23 @@ function Cart(props) {
         <button className={classes.button} onClick={props.onClose}>Close</button>
       </div>
     </>
-  )
+  );
+
+  const httpErrorModalContent = (
+    <>
+      <p>{httpError}</p>
+      <div className={classes.actions}>
+        <button className={classes.button} onClick={props.onClose}>Close</button>
+      </div>
+    </>
+  );
 
   return (
     <Modal onClose={props.onClose}>
-      {!isSubmitting && !didSubmit && cartModalContent}
+      {!isSubmitting && !didSubmit && !httpError && cartModalContent}
       {isSubmitting && isSubmittingModalContent}
       {!isSubmitting && didSubmit && didSubmitModalContent}
+      {httpError && httpErrorModalContent}
     </Modal >
   )
 };
